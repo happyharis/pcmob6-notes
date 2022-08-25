@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { PROFILE_SCREEN, API, API_LOGIN } from "../constants";
+import { PROFILE_SCREEN, API, API_LOGIN, API_SIGNUP } from "../constants";
 
 export default function AuthScreen() {
   const navigation = useNavigation();
@@ -19,6 +19,31 @@ export default function AuthScreen() {
   const [password, setPassword] = useState("");
   const [errorText, setErrorText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isLoginScreen, setIsLoginScreen] = useState(true);
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    return () => setLoading(false);
+  }, []);
+
+  async function signUp() {
+    setLoading(true);
+    if (password != confirmPassword) {
+      setErrorText("Your password dont match.");
+    } else {
+      try {
+        const response = await axios.post(API + API_SIGNUP, {
+          username,
+          password,
+        });
+        if (response.data.Error) setErrorText(response.data.Error);
+        else login();
+      } catch (error) {
+        console.log(error.response);
+        setErrorText(error.response.data.description);
+      }
+    }
+  }
 
   async function login() {
     setLoading(true);
@@ -38,7 +63,9 @@ export default function AuthScreen() {
   }
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login to your account</Text>
+      <Text style={styles.title}>
+        {isLoginScreen ? "Login to your account" : "Register new account"}
+      </Text>
 
       <TextInput
         style={styles.inputView}
@@ -55,17 +82,40 @@ export default function AuthScreen() {
         onChangeText={(pw) => setPassword(pw)}
       />
 
+      {!isLoginScreen && (
+        <TextInput
+          style={styles.inputView}
+          placeholder="Password confirm"
+          secureTextEntry={true}
+          value={confirmPassword}
+          onChangeText={(pw) => setConfirmPassword(pw)}
+        />
+      )}
+
       <TouchableOpacity
         style={styles.button}
         onPress={async () => {
-          await login();
+          isLoginScreen ? await login() : await signUp();
         }}
       >
         {loading ? (
           <ActivityIndicator style={styles.buttonText} />
         ) : (
-          <Text style={styles.buttonText}>Login</Text>
+          <Text style={styles.buttonText}>
+            {isLoginScreen ? "Login" : "Register"}
+          </Text>
         )}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => {
+          setIsLoginScreen(!isLoginScreen);
+          setErrorText("");
+        }}
+      >
+        <Text>
+          {isLoginScreen ? "No account? Sign up" : "Have account? Register"}
+        </Text>
       </TouchableOpacity>
 
       <Text style={styles.errorText}>{errorText}</Text>
