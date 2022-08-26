@@ -7,7 +7,10 @@ import {
 } from "react-native";
 import React from "react";
 import { useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { NOTES_SCREEN } from "../constants";
 export default function NotesScreenHome() {
+  const navigation = useNavigation();
   const posts = useSelector((state) => state.notes);
   function renderItem({ item }) {
     return (
@@ -30,7 +33,12 @@ export default function NotesScreenHome() {
       />
 
       <View style={{ flex: 1 }} />
-      <TouchableOpacity style={styles.button} onPress={() => {}}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          navigation.navigate(NOTES_SCREEN.Add);
+        }}
+      >
         <Text style={styles.buttonText}>Add Note</Text>
       </TouchableOpacity>
     </View>
