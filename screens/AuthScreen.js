@@ -26,6 +26,12 @@ export default function AuthScreen() {
     return () => setLoading(false);
   }, []);
 
+  function resetTextInputs() {
+    setUsername("");
+    setPassword("");
+    setConfirmPassword("");
+  }
+
   async function signUp() {
     setLoading(true);
     if (password != confirmPassword) {
@@ -54,6 +60,7 @@ export default function AuthScreen() {
         password,
       });
       await AsyncStorage.setItem("token", response.data.access_token);
+      resetTextInputs();
       navigation.navigate(PROFILE_SCREEN);
     } catch (error) {
       console.log(error.response);
@@ -113,7 +120,7 @@ export default function AuthScreen() {
           setErrorText("");
         }}
       >
-        <Text>
+        <Text style={styles.switchText}>
           {isLoginScreen ? "No account? Sign up" : "Have account? Register"}
         </Text>
       </TouchableOpacity>
@@ -124,6 +131,11 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
+  switchText: {
+    fontSize: 20,
+    marginTop: 20,
+    color: "gray",
+  },
   errorText: {
     marginTop: 20,
     fontSize: 15,
