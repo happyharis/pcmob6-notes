@@ -10,8 +10,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { noteAdded } from "../features/notesSlice";
 
 export default function NotesScreenAdd() {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const [noteTitle, setNoteTitle] = useState("");
   const [noteBody, setNoteBody] = useState("");
@@ -40,7 +43,13 @@ export default function NotesScreenAdd() {
         multiline={true}
       />
       <View style={{ flex: 1 }} />
-      <TouchableOpacity style={styles.button} onPress={() => {}}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          dispatch(noteAdded({ id: 3, title: noteTitle, content: noteBody }));
+          navigation.goBack();
+        }}
+      >
         <Text style={styles.buttonText}>Add Note</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
