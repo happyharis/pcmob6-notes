@@ -6,9 +6,19 @@ import { ActivityIndicator, StatusBar, StyleSheet, View } from "react-native";
 import HomeStack from "./components/HomeStack";
 import { AUTH_SCREEN, HOME_STACK } from "./constants";
 import AuthScreen from "./screens/AuthScreen";
+import store from "./store";
+import { Provider } from "react-redux";
 const Stack = createStackNavigator();
 
 export default function App() {
+  return (
+    <Provider store={store}>
+      <AppSource />
+    </Provider>
+  );
+}
+
+function AppSource() {
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
 
