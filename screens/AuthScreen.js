@@ -1,3 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -7,11 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { PROFILE_SCREEN, API, API_LOGIN, API_SIGNUP } from "../constants";
+import { API, API_LOGIN, API_SIGNUP, HOME_STACK } from "../constants";
 
 export default function AuthScreen() {
   const navigation = useNavigation();
@@ -42,9 +42,14 @@ export default function AuthScreen() {
           username,
           password,
         });
-        if (response.data.Error) setErrorText(response.data.Error);
-        else login();
+        if (response.data.Error) {
+          setLoading(false);
+          setErrorText(response.data.Error);
+        } else {
+          login();
+        }
       } catch (error) {
+        setLoading(false);
         console.log(error.response);
         setErrorText(error.response.data.description);
       }
@@ -61,7 +66,7 @@ export default function AuthScreen() {
       });
       await AsyncStorage.setItem("token", response.data.access_token);
       resetTextInputs();
-      navigation.navigate(PROFILE_SCREEN);
+      navigation.navigate(HOME_STACK);
     } catch (error) {
       console.log(error.response);
       setErrorText(error.response.data.description);
