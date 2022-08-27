@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { useDispatch } from "react-redux";
-import { updatePostThunk } from "../features/notesSlice";
+import { deletePostThunk, updatePostThunk } from "../features/notesSlice";
 
 export default function NotesScreenDetails() {
   const route = useRoute();
@@ -35,6 +35,16 @@ export default function NotesScreenDetails() {
       await dispatch(updatePostThunk(updatedPost));
     } catch (error) {
       console.error("Failed:", error);
+    } finally {
+      navigation.goBack();
+    }
+  }
+
+  async function deletePost(id) {
+    try {
+      await dispatch(deletePostThunk(id));
+    } catch (error) {
+      console.error("Failed", error);
     } finally {
       navigation.goBack();
     }
@@ -69,7 +79,10 @@ export default function NotesScreenDetails() {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => {}} style={{ marginLeft: 15 }}>
+        <TouchableOpacity
+          onPress={() => deletePost(id)}
+          style={{ marginLeft: 15 }}
+        >
           <FontAwesome name={"trash"} size={24} color={"black"} />
         </TouchableOpacity>
       </View>

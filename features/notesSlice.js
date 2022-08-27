@@ -41,6 +41,17 @@ export const updatePostThunk = createAsyncThunk(
   }
 );
 
+export const deletePostThunk = createAsyncThunk(
+  "posts/deletePost",
+  async (id) => {
+    const token = await AsyncStorage.getItem("token");
+    await axios.delete(API + API_POSTS + "/" + id, {
+      headers: { Authorization: `JWT ${token}` },
+    });
+    return id;
+  }
+);
+
 const notesSlice = createSlice({
   name: "notes",
   initialState,
@@ -73,6 +84,11 @@ const notesSlice = createSlice({
           existingPost.title = title;
           existingPost.content = content;
         }
+      })
+      .addCase(deletePostThunk.fulfilled, (state, action) => {
+        const id = action.payload;
+        const updatedPosts = state.posts.filter((item) => item.id !== id);
+        state.posts = updatedPosts;
       });
   },
 });
