@@ -28,6 +28,19 @@ export const addNewPost = createAsyncThunk(
   }
 );
 
+export const updatePostThunk = createAsyncThunk(
+  "notes/updatePost",
+  async (updatedPost) => {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.put(
+      API + API_POSTS + "/" + updatedPost.id,
+      updatedPost,
+      { headers: { Authorization: `JWT ${token}` } }
+    );
+    return response.data;
+  }
+);
+
 const notesSlice = createSlice({
   name: "notes",
   initialState,
@@ -49,6 +62,17 @@ const notesSlice = createSlice({
       })
       .addCase(addNewPost.fulfilled, (state, action) => {
         state.posts.push(action.payload);
+      })
+      .addCase(updatePostThunk.fulfilled, (state, action) => {
+        const { id, title, content } = action.payload;
+        // const id = action.payload.id
+        // const title = action.payload.title
+        // const content = action.payload.content
+        const existingPost = state.posts.find((post) => post.id === id);
+        if (existingPost) {
+          existingPost.title = title;
+          existingPost.content = content;
+        }
       });
   },
 });
