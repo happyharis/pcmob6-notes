@@ -1,5 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { nanoid } from "@reduxjs/toolkit";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -11,13 +12,31 @@ import {
   View,
 } from "react-native";
 import { useDispatch } from "react-redux";
-import { noteAdded } from "../features/notesSlice";
+import { addNewPost } from "../features/notesSlice";
 
 export default function NotesScreenAdd() {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [noteTitle, setNoteTitle] = useState("");
   const [noteBody, setNoteBody] = useState("");
+  const canSave = [noteTitle, noteBody].every(Boolean);
+
+  async function savePost() {
+    if (canSave) {
+      try {
+        const post = {
+          id: nanoid(),
+          title: noteTitle,
+          content: noteBody,
+        };
+        await dispatch(addNewPost(post));
+      } catch (error) {
+        console.log("Failed to save post:", error);
+      } finally {
+        navigation.goBack();
+      }
+    }
+  }
 
   return (
     <KeyboardAvoidingView
@@ -45,10 +64,7 @@ export default function NotesScreenAdd() {
       <View style={{ flex: 1 }} />
       <TouchableOpacity
         style={styles.button}
-        onPress={() => {
-          dispatch(noteAdded({ id: 3, title: noteTitle, content: noteBody }));
-          navigation.goBack();
-        }}
+        onPress={async () => await savePost()}
       >
         <Text style={styles.buttonText}>Add Note</Text>
       </TouchableOpacity>

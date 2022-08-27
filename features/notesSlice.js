@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-import { API, API_POSTS, API_STATUS } from "../constants";
+import { API, API_CREATE, API_POSTS, API_STATUS } from "../constants";
 
 const initialState = {
   posts: [],
@@ -21,7 +21,7 @@ export const addNewPost = createAsyncThunk(
   "notes/addNewPost",
   async (newPost) => {
     const token = await AsyncStorage.getItem("token");
-    const response = await axios.post(API + API_POSTS, newPost, {
+    const response = await axios.post(API + API_CREATE, newPost, {
       headers: { Authorization: `JWT ${token}` },
     });
     return response.data;
