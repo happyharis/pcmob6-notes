@@ -5,13 +5,23 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
+  LayoutAnimation,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  UIManager,
   View,
 } from "react-native";
 import { API, API_LOGIN, API_SIGNUP, HOME_STACK } from "../constants";
+
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export default function AuthScreen() {
   const navigation = useNavigation();
@@ -35,7 +45,7 @@ export default function AuthScreen() {
   async function signUp() {
     setLoading(true);
     if (password != confirmPassword) {
-      setErrorText("Your password dont match.");
+      setErrorText("Your passwords don't match. Check and try again.");
     } else {
       try {
         const response = await axios.post(API + API_SIGNUP, {
@@ -43,15 +53,18 @@ export default function AuthScreen() {
           password,
         });
         if (response.data.Error) {
+          // We have an error message for if the user already exists
           setLoading(false);
           setErrorText(response.data.Error);
         } else {
           login();
         }
       } catch (error) {
-        setLoading(false);
-        console.log(error.response);
+        console.log("Failed logging in. Error: ", error.response);
         setErrorText(error.response.data.description);
+      } finally {
+        setLoading(false);
+        LayoutAnimation.spring();
       }
     }
   }
@@ -70,8 +83,10 @@ export default function AuthScreen() {
     } catch (error) {
       console.log(error.response);
       setErrorText(error.response.data.description);
+    } finally {
+      setLoading(false);
+      LayoutAnimation.spring();
     }
-    setLoading(false);
   }
   return (
     <View style={styles.container}>
@@ -97,16 +112,17 @@ export default function AuthScreen() {
       {!isLoginScreen && (
         <TextInput
           style={styles.inputView}
-          placeholder="Password confirm"
+          placeholder="Password Confirm"
           secureTextEntry={true}
-          value={confirmPassword}
           onChangeText={(pw) => setConfirmPassword(pw)}
         />
       )}
 
       <TouchableOpacity
-        style={styles.button}
+        style={loading ? styles.buttonLoading : styles.button}
         onPress={async () => {
+          LayoutAnimation.spring();
+          setErrorText("");
           isLoginScreen ? await login() : await signUp();
         }}
       >
@@ -121,12 +137,15 @@ export default function AuthScreen() {
 
       <TouchableOpacity
         onPress={() => {
+          LayoutAnimation.easeInEaseOut();
           setIsLoginScreen(!isLoginScreen);
           setErrorText("");
         }}
       >
         <Text style={styles.switchText}>
-          {isLoginScreen ? "No account? Sign up" : "Have account? Register"}
+          {isLoginScreen
+            ? "No account? Sign up now."
+            : "Already have an account? Log in here."}
         </Text>
       </TouchableOpacity>
 
@@ -136,6 +155,12 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
+  buttonLoading: {
+    backgroundColor: "black",
+    borderRadius: 15,
+    width: "20%",
+    marginHorizontal: "40%",
+  },
   switchText: {
     fontSize: 20,
     marginTop: 20,
